@@ -1,0 +1,52 @@
+write "<Konstanty>";
+write "10: ",10;
+write " 1.25: ", 1.25;
+write "";;
+
+write "<Promenne>";
+String s;
+s="Abcd";
+write "s(Abcd): ", s;
+
+float d;
+d=3.14159e2;
+write "d(3.14159e2): ", d;
+
+int n;
+n=-500;
+write "n(-500): ", n;
+write "";
+
+boolean k;
+k=True;
+write "k(True): ",k;
+write "";
+
+write "<Vyrazy>";
+write "2+3*5(17): ",2+3*5;
+write "17 / 3(5): ", 17 / 3;
+write "17 mod 3(2): ", 17 % 3;
+write "2.5*2.5/6.25(1.0): ", 2.5*2.5/6.25;
+write "1.5*3(4.5): ", 1.5*3;
+write "abc+def (abcdef): ", "abc"."def";
+write "";
+
+write  "<Poznamky>"; // Poznamka
+// write  "Taky poznamka";
+
+write "<Kompatibilita>";
+float y;
+y= 10;
+write "y (10.0): ", y;
+
+write "<Vstup dat - a,b#,c$>";
+int a;
+float b;
+String c;
+boolean e;
+a = 0;
+b = 0.0;
+c = "";
+e = True;
+read a,b,c,e;
+write "a,b,c,e: ", a, ",", b, ",", c, ",",e;
