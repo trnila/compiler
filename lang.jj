@@ -21,170 +21,117 @@ public class LangParser {
 }
 PARSER_END(LangParser)
 
-
 /* WHITE SPACE */
-
 SKIP :
 {
-  " "
-| "\t"
-| "\n"
-| "\r"
-| "\f"
+	  " "
+	| "\t"
+	| "\n"
+	| "\r"
 }
 
 /* COMMENTS */
-
 MORE :
 {
-  "//" : IN_SINGLE_LINE_COMMENT
+	"//" : IN_SINGLE_LINE_COMMENT
 }
 
 <IN_SINGLE_LINE_COMMENT>
 SPECIAL_TOKEN :
 {
-  <SINGLE_LINE_COMMENT: "\n" | "\r" | "\r\n" > : DEFAULT
+	<SINGLE_LINE_COMMENT: "\n" | "\r" | "\r\n" > : DEFAULT
 }
 
 <IN_SINGLE_LINE_COMMENT>
 MORE :
 {
-  < ~[] >
+	<~[]>
 }
 
 /* RESERVED WORDS AND LITERALS */
-
 TOKEN :
 {
-< BOOLEAN: "boolean" >
-| < DOUBLE: "double" >
-| < ELSE: "else" >
-| < FALSE: "False" >
-| < FLOAT: "float" >
-| < FOR: "for" >
-| < IF: "if" >
-| < INT: "int" >
-| < STRING: "String" >
-| < TRUE: "True" >
-| < WRITE: "write" >
-| < READ: "read" >
-| < THEN: "then" >
-| < END: "end" >
-| < BEGIN: "begin" >
+	// date types
+	  <INT: "int">
+	| <FLOAT: "float">
+	| <BOOLEAN: "boolean">
+	| <STRING: "String">
+
+	// literals
+	| <TRUE: "True">
+	| <FALSE: "False">
+
+	// "functions"
+	| <READ: "read">
+	| <WRITE: "write">
+
+	// other constructs
+	| <IF: "if">
+	| <THEN: "then">
+	| <ELSE: "else">
+	| <FOR: "for">
+	| <BEGIN: "begin">
+	| <END: "end">
 }
 
 /* LITERALS */
-
 TOKEN :
 {
-  < INTEGER_LITERAL:
-        <DECIMAL_LITERAL>
-      | <HEX_LITERAL>
-      | <OCTAL_LITERAL>
-  >
-|
-  < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
-|
-  < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
-|
-  < #OCTAL_LITERAL: "0" (["0"-"7"])* >
-|
-  < FLOATING_POINT_LITERAL:
-        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])?
-      | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])?
-      | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])?
-      | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]
-  >
-|
-  < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
-|
-  < STRING_LITERAL:
-      "\""
-      (   (~["\"","\\","\n","\r"])
-        | ("\\"
-            ( ["n","t","b","r","f","\\","'","\""]
-            | ["0"-"7"] ( ["0"-"7"] )?
-            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
-            )
-          )
-      )*
-      "\""
-  >
+	  <INTEGER_LITERAL: (["1"-"9"] (["0"-"9"])*) | "0">
+	| <FLOATING_POINT_LITERAL:
+		  (["0"-"9"])+ "." (["0"-"9"])+ (<EXPONENT>)?
+		| (["0"-"9"])+ <EXPONENT>
+	  >
+	| <#EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+	| <STRING_LITERAL: "\"" (~["\""])* "\"">
 }
 
 /* IDENTIFIERS */
-
 TOKEN :
 {
-  < IDENTIFIER: <LETTER> (<PART_LETTER>)* >
-|
-  < #LETTER:
-      [  // all chars for which Character.isIdentifierStart is true
-         "$",
-         "A"-"Z",
-         "_",
-         "a"-"z"
-      ]
-  >
-|
-  < #PART_LETTER:
-      [  // all chars for which Character.isIdentifierPart is true
-         "$",
-         "0"-"9",
-         "A"-"Z",
-         "_",
-         "a"-"z"
-      ]
-  >
+	<IDENTIFIER: <LETTER> (<PART_LETTER>)*>
+	| <#LETTER: ["a"-"z", "A"-"Z", "_"]>
+	| <#PART_LETTER: ["0"-"9", "a"-"z", "A"-"Z", "_"]>
 }
 
 /* SEPARATORS */
-
 TOKEN :
 {
-  < LPAREN: "(" >
-| < RPAREN: ")" >
-| < SEMICOLON: ";" >
-| < COMMA: "," >
+	  <LPAREN: "(">
+	| <RPAREN: ")">
+	| <SEMICOLON: ";">
+	| <COMMA: ",">
 }
 
 /* OPERATORS */
-
 TOKEN :
 {
-  < ASSIGN: "=" >
-| < DOT: "." >
-| < GT: ">" >
-| < LT: "<" >
-| < BANG: "!" >
-| < HOOK: "?" >
-| < COLON: ":" >
-| < EQ: "==" >
-| < LE: "<=" >
-| < GE: ">=" >
-| < NE: "!=" >
-| < SC_OR: "||" >
-| < SC_AND: "&&" >
-| < PLUS: "+" >
-| < MINUS: "-" >
-| < STAR: "*" >
-| < SLASH: "/" >
+	  <ASSIGN: "=">
+	| <DOT: ".">
+	| <GT: ">">
+	| <LT: "<">
+	| <BANG: "!">
+	| <HOOK: "?">
+	| <COLON: ":">
+	| <EQ: "==">
+	| <LE: "<=">
+	| <GE: ">=">
+	| <NE: "!=">
+	| <SC_OR: "||">
+	| <SC_AND: "&&">
+	| <PLUS: "+">
+	| <MINUS: "-">
+	| <STAR: "*">
+	| <SLASH: "/">
+	| <DIV: "%">
 }
 
-
-/*****************************************
- * THE JAVA LANGUAGE GRAMMAR STARTS HERE *
- *****************************************/
-
-/*
- * Program structuring syntax follows.
- */
-
+// GRAMMAR
 void Program() :
 {}
 {
 	Statements()
-  <EOF>
+	<EOF>
 }
 
 void Statements():
@@ -196,17 +143,10 @@ void Statements():
 /*
  * Declaration syntax follows.
  */
-
-void VariableDeclarator() :
-{}
-{
-  VariableDeclaratorId()
-}
-
 void VariableDeclaratorId() :
 {}
 {
-  <IDENTIFIER>
+	<IDENTIFIER>
 }
 
 /*
@@ -216,11 +156,10 @@ void VariableDeclaratorId() :
 void Type() :
 {}
 {
-    "boolean"
-  | "int"
-  | "float"
-  | "double"
-  | "String"
+	  <BOOLEAN>
+	| <INT>
+	| <FLOAT>
+	| <STRING>
 }
 
 /*
@@ -230,185 +169,146 @@ void Type() :
 void Expression() :
 {}
 {
-	LOOKAHEAD(VariableDeclaratorId() "=") Assignment()
+	  LOOKAHEAD(VariableDeclaratorId() "=") Assignment()
 	| ConditionalExpression()
 }
 
 void Assignment() :
 {}
 {
-  VariableDeclaratorId() "=" Expression()
+	VariableDeclaratorId() "=" Expression()
 }
 
 void ConditionalExpression() :
 {}
 {
-  ConditionalOrExpression() [ "?" Expression() ":" ConditionalExpression() ]
+	ConditionalOrExpression() [ "?" Expression() ":" ConditionalExpression() ]
 }
 
 void ConditionalOrExpression() :
 {}
 {
-  ConditionalAndExpression() ( "||" ConditionalAndExpression() )*
+	ConditionalAndExpression() ( "||" ConditionalAndExpression() )*
 }
 
 void ConditionalAndExpression() :
 {}
 {
-  InclusiveOrExpression() ( "&&" InclusiveOrExpression() )*
-}
-
-void InclusiveOrExpression() :
-{}
-{
-  ExclusiveOrExpression() ( "|" ExclusiveOrExpression() )*
-}
-
-void ExclusiveOrExpression() :
-{}
-{
-  AndExpression() ( "^" AndExpression() )*
-}
-
-void AndExpression() :
-{}
-{
-  EqualityExpression() ( "&" EqualityExpression() )*
+	EqualityExpression() ( "&&" EqualityExpression() )*
 }
 
 void EqualityExpression() :
 {}
 {
-  InstanceOfExpression() ( ( "==" | "!=" ) InstanceOfExpression() )*
-}
-
-void InstanceOfExpression() :
-{}
-{
-  RelationalExpression() [ "instanceof" Type() ]
+	RelationalExpression() ( ( "==" | "!=" ) RelationalExpression() )*
 }
 
 void RelationalExpression() :
 {}
 {
-  ShiftExpression() ( ( "<" | ">" | "<=" | ">=" ) ShiftExpression() )*
-}
-
-void ShiftExpression() :
-{}
-{
-  AdditiveExpression() ( ( "<<" | ">>" | ">>>" ) AdditiveExpression() )*
+	AdditiveExpression() ( ( "<" | ">" | "<=" | ">=" ) AdditiveExpression() )*
 }
 
 void AdditiveExpression() :
 {}
 {
-  MultiplicativeExpression() ( ( "+" | "-" | "." ) MultiplicativeExpression() )*
+	MultiplicativeExpression() ( ( "+" | "-" | "." ) MultiplicativeExpression() )*
 }
 
 void MultiplicativeExpression() :
 {}
 {
-  UnaryExpression() ( ( "*" | "/" | "%" ) UnaryExpression() )*
+	UnaryExpression() ( ( "*" | "/" | "%" ) UnaryExpression() )*
 }
 
 void UnaryExpression() :
 {}
 {
-  ( "+" | "-" ) UnaryExpression()
-|
-  UnaryExpressionNotPlusMinus()
+	  ( "-" ) UnaryExpression()
+	| UnaryExpressionNotPlusMinus()
 }
 
 void UnaryExpressionNotPlusMinus() :
 {}
 {
-  ( "~" | "!" ) UnaryExpression()
-  | PrimaryPrefix()
+	  ( "!" ) UnaryExpression()
+	| PrimaryPrefix()
 }
 
 void PrimaryPrefix() :
 {}
 {
-  Literal()
-| VariableDeclaratorId()
-| "(" Expression() ")"
+	  Literal()
+	| VariableDeclaratorId()
+	| "(" Expression() ")"
 }
 
 void Literal() :
 {}
 {
- <INTEGER_LITERAL>
-| <FLOATING_POINT_LITERAL>
-| <STRING_LITERAL>
-| <TRUE>
-| <FALSE>
-}
-
-void Arguments() :
-{}
-{
-  "(" [ ArgumentList() ] ")"
-}
-
-void ArgumentList() :
-{}
-{
-  Expression() ( "," Expression() )*
+	  <INTEGER_LITERAL>
+	| <FLOATING_POINT_LITERAL>
+	| <STRING_LITERAL>
+	| <TRUE>
+	| <FALSE>
 }
 
 /*
  * Statement syntax follows.
  */
-
 void Statement() :
 {}
 {
-  ";"
-| LocalVariableDeclaration() ";"
-| IfStatement()
-| ForStatement()
-| WriteStatement()
-| ReadStatement()
-| Expression() ";"
+	  ";"
+	| LocalVariableDeclaration() ";"
+	| IfStatement()
+	| ForStatement()
+	| WriteStatement()
+	| ReadStatement()
+	| Expression() ";"
 }
 
 void LocalVariableDeclaration() :
 {}
 {
-  Type() VariableDeclarator() ( "," VariableDeclarator() )*
-}
-
-void StatementExpression() :
-/*
- * The last expansion of this production accepts more than the legal
- * Java expansions for StatementExpression.  This expansion does not
- * use PostfixExpression for performance reasons.
- */
-{}
-{Expression()
+	Type() VariableDeclaratorId() ( "," VariableDeclaratorId() )*
 }
 
 void IfStatement() :
-/*
- * The disambiguating algorithm of JavaCC automatically binds dangling
- * else's to the innermost if statement.  The LOOKAHEAD specification
- * is to tell JavaCC that we know what we are doing.
- */
 {}
 {
-  "if" Expression() <THEN> Statements() [ LOOKAHEAD(<ELSE>) <ELSE> Statements() ] <END> ";"
+	"if" Expression() <THEN> Statements() [ LOOKAHEAD(<ELSE>) <ELSE> Statements() ] <END> ";"
 }
 
 void ForStatement() :
 {}
 {
-  "for" "(" [ ForInit() ] ";" [ Expression() ] ";" [ ForUpdate() ] ")"
-   <BEGIN>
-    Statements()
-   <END>";"
+	"for" "(" [ ForInit() ] ";" [ Expression() ] ";" [ ForUpdate() ] ")"
+	<BEGIN>
+	Statements()
+	<END>";"
 }
 
+void ForInit() :
+{}
+{
+	  LOOKAHEAD(Type() <IDENTIFIER>) LocalVariableDeclaration()
+	| StatementExpressionList()
+}
+
+void StatementExpressionList() :
+{}
+{
+	Expression() ( "," Expression() )*
+}
+
+void ForUpdate() :
+{}
+{
+	StatementExpressionList()
+}
+
+// IO Commands
 void WriteStatement() :
 {}
 {
@@ -419,25 +319,4 @@ void ReadStatement() :
 {}
 {
 	"read" StatementExpressionList() ";"
-}
-
-void ForInit() :
-{}
-{
-  LOOKAHEAD( [ "final" ] Type() <IDENTIFIER> )
-  LocalVariableDeclaration()
-|
-  StatementExpressionList()
-}
-
-void StatementExpressionList() :
-{}
-{
-  StatementExpression() ( "," StatementExpression() )*
-}
-
-void ForUpdate() :
-{}
-{
-  StatementExpressionList()
 }
