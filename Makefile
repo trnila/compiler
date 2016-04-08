@@ -32,3 +32,4 @@ test: all
 	java -cp classes LangParser tests/t1.txt
 	java -cp classes LangParser tests/t2.txt
 	java -cp classes LangParser tests/t3.txt
+	java -cp classes LangParser tests/isPrime
