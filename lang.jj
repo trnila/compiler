@@ -16,7 +16,7 @@ public class LangParser {
 		}
 
 		LangParser parser = new LangParser(is);
-		parser.Statements();
+		parser.Program();
 	}
 }
 PARSER_END(LangParser)
@@ -68,6 +68,9 @@ TOKEN :
 | < TRUE: "True" >
 | < WRITE: "write" >
 | < READ: "read" >
+| < THEN: "then" >
+| < END: "end" >
+| < BEGIN: "begin" >
 }
 
 /* LITERALS */
@@ -177,11 +180,17 @@ TOKEN :
  * Program structuring syntax follows.
  */
 
-void Statements() :
+void Program() :
+{}
+{
+	Statements()
+  <EOF>
+}
+
+void Statements():
 {}
 {
 	(Statement())+
-  <EOF>
 }
 
 /*
@@ -388,13 +397,16 @@ void IfStatement() :
  */
 {}
 {
-  "if" "(" Expression() ")" Statement() [ LOOKAHEAD(1) "else" Statement() ]
+  "if" Expression() <THEN> Statements() [ LOOKAHEAD(<ELSE>) <ELSE> Statements() ] <END> ";"
 }
 
 void ForStatement() :
 {}
 {
-  "for" "(" [ ForInit() ] ";" [ Expression() ] ";" [ ForUpdate() ] ")" Statement()
+  "for" "(" [ ForInit() ] ";" [ Expression() ] ";" [ ForUpdate() ] ")"
+   <BEGIN>
+    Statements()
+   <END>";"
 }
 
 void WriteStatement() :
