@@ -276,7 +276,7 @@ void LocalVariableDeclaration() :
 void IfStatement() :
 {}
 {
-	"if" Expression() <THEN> Statements() [ LOOKAHEAD(<ELSE>) <ELSE> Statements() ] <END> ";"
+	"if" Expression() <THEN> Statements() [ <ELSE> Statements() ] <END> ";"
 }
 
 void ForStatement() :
