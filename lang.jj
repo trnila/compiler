@@ -224,8 +224,7 @@ void MultiplicativeExpression() :
 void UnaryExpression() :
 {}
 {
-	  ( "-" ) UnaryExpression()
-	| UnaryExpressionNotPlusMinus()
+	  ( "-" ) UnaryExpression() | "!" UnaryExpression() | PrimaryPrefix()
 }
 
 void UnaryExpressionNotPlusMinus() :
