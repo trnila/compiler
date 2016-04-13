@@ -291,8 +291,7 @@ void ForStatement() :
 void ForInit() :
 {}
 {
-	  LOOKAHEAD(Type() <IDENTIFIER>) LocalVariableDeclaration()
-	| StatementExpressionList()
+    StatementExpressionList()
 }
 
 void StatementExpressionList() :
