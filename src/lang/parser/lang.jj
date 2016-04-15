@@ -191,18 +191,20 @@ Expression Expression() :
 	Expression expr = null;
 }
 {
-	  (LOOKAHEAD(VariableDeclaratorId() "=") Assignment()
+	  (LOOKAHEAD(VariableDeclaratorId() "=") expr = Assignment()
 	| expr = ConditionalExpression())
 
 	{ return expr; }
 }
 
-void Assignment() :
+AssignmentExpression Assignment() :
 {
-	Expression expr = null;
+	Expression expr;
+	Variable var;
 }
 {
-	VariableDeclaratorId() "=" Expression()
+	var = VariableDeclaratorId() "=" expr = Expression()
+	{return new AssignmentExpression(var, expr);}
 }
 
 Expression ConditionalExpression() :

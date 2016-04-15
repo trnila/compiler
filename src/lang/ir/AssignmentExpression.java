@@ -10,11 +10,11 @@ import lang.utils.IRVisitor;
  *
  * @author beh01
  */
-public class AssignmentStatement extends Statement {
+public class AssignmentExpression extends Expression {
     private Variable variable;
     private Expression expression;
 
-    public AssignmentStatement(Variable variable, Expression expression) {
+    public AssignmentExpression(Variable variable, Expression expression) {
         this.variable = variable;
         this.expression = expression;
     }
@@ -37,8 +37,6 @@ public class AssignmentStatement extends Statement {
     
     @Override
     public String toString() {
-        return variable.toString()+" = "+expression.toString()+"\n";
+        return "(" + variable.toString()+" = "+expression.toString()+ ")";
     }
-
-
 }

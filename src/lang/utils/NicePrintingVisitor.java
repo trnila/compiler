@@ -24,7 +24,7 @@ public class NicePrintingVisitor implements IRVisitor {
     }
 
     @Override
-    public void visit(AssignmentStatement st) {
+    public void visit(AssignmentExpression st) {
         String expr = data.pop();
         String variable = data.pop();
         data.push(variable + " = " + expr + ";");

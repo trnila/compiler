@@ -13,7 +13,7 @@ import lang.ir.*;
  * @author beh01
  */
 public interface  IRVisitor {
-    void visit(AssignmentStatement st);
+    void visit(AssignmentExpression st);
     void visit(BinaryExpression exp);
     void visit(BlockOfStatements st);
     void visit(TernaryExpression exp);

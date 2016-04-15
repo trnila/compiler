@@ -15,7 +15,7 @@ import lang.ir.*;
 public class TypeChecking implements IRVisitor{
 
     @Override
-    public void visit(AssignmentStatement st) {
+    public void visit(AssignmentExpression st) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
