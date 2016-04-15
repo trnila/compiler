@@ -1,12 +1,15 @@
 options {
   JAVA_UNICODE_ESCAPE = true;
-  DEBUG_PARSER = true;
+  DEBUG_PARSER = false;
 }
 
 PARSER_BEGIN(LangParser)
 package lang.parser;
 
 import java.io.*;
+import java.util.List;
+import java.util.ArrayList;
+import lang.ir.*;
 
 public class LangParser {
 	public static void main(String args[]) throws Exception {
@@ -129,150 +132,265 @@ TOKEN :
 }
 
 // GRAMMAR
-void Program() :
+BlockOfStatements Program() :
 {}
 {
-	Statements()
+	{return Statements(); }
 	<EOF>
 }
 
-void Statements():
-{}
+BlockOfStatements Statements():
 {
-	(Statement())+
+	BlockOfStatements statements = new BlockOfStatements();
+	Statement s;
+}
+{
+	(
+		s = Statement()
+		{
+			if(s != null) {
+				statements.getStatements().add(s);
+			}
+		}
+	)+
+
+	{return statements;}
 }
 
 /*
  * Declaration syntax follows.
  */
-void VariableDeclaratorId() :
-{}
+Variable VariableDeclaratorId() :
 {
-	<IDENTIFIER>
+	Token tok;
+}
+{
+	tok = <IDENTIFIER>
+	{return new Variable(tok.toString());}
 }
 
 /*
  * Type, name and expression syntax follows.
  */
 
-void Type() :
+Type Type() :
 {}
 {
-	  <BOOLEAN>
-	| <INT>
-	| <FLOAT>
-	| <STRING>
+	  <BOOLEAN> {return Type.BOOLEAN;}
+	| <INT> {return Type.INT;}
+	| <FLOAT> {return Type.FLOAT;}
+	| <STRING> {return Type.STRING;}
 }
 
 /*
  * Expression syntax follows.
  */
 
-void Expression() :
-{}
+Expression Expression() :
 {
-	  LOOKAHEAD(VariableDeclaratorId() "=") Assignment()
-	| ConditionalExpression()
+	Expression expr = null;
+}
+{
+	  (LOOKAHEAD(VariableDeclaratorId() "=") Assignment()
+	| expr = ConditionalExpression())
+
+	{ return expr; }
 }
 
 void Assignment() :
-{}
+{
+	Expression expr = null;
+}
 {
 	VariableDeclaratorId() "=" Expression()
 }
 
-void ConditionalExpression() :
-{}
+Expression ConditionalExpression() :
 {
-	ConditionalOrExpression() [ "?" Expression() ":" ConditionalExpression() ]
+	Expression expr = null;
+}
+{
+	expr = ConditionalOrExpression() [ "?" Expression() ":" ConditionalExpression() ]
+	{return expr;}
 }
 
-void ConditionalOrExpression() :
-{}
+Expression ConditionalOrExpression() :
 {
-	ConditionalAndExpression() ( "||" ConditionalAndExpression() )*
+	Expression expr = null;
+}
+{
+	expr = ConditionalAndExpression() ( "||" ConditionalAndExpression() )*
+	{return expr;}
 }
 
-void ConditionalAndExpression() :
-{}
+Expression ConditionalAndExpression() :
 {
-	EqualityExpression() ( "&&" EqualityExpression() )*
+	Expression expr = null;
+}
+{
+	expr = EqualityExpression() ( "&&" EqualityExpression() )*
+	{return expr;}
 }
 
-void EqualityExpression() :
-{}
+Expression EqualityExpression() :
 {
-	RelationalExpression() ( ( "==" | "!=" ) RelationalExpression() )*
+	Expression expr = null;
+}
+{
+	expr = RelationalExpression() ( ( "==" | "!=" ) RelationalExpression() )*
+	{return expr;}
 }
 
-void RelationalExpression() :
-{}
+Expression RelationalExpression() :
 {
-	AdditiveExpression() ( ( "<" | ">" | "<=" | ">=" ) AdditiveExpression() )*
+	Expression expr = null;
+}
+{
+	expr = AdditiveExpression() ( ( "<" | ">" | "<=" | ">=" ) AdditiveExpression() )*
+	{return expr;}
 }
 
-void AdditiveExpression() :
-{}
+Expression AdditiveExpression() :
 {
-	MultiplicativeExpression() ( ( "+" | "-" | "." ) MultiplicativeExpression() )*
+	Expression expr = null, expr2;
+	Token tok;
+}
+{
+	expr = MultiplicativeExpression()
+	(
+		(tok = "+" | tok = "-" | tok = ".")
+		expr2 = MultiplicativeExpression()
+
+		{expr = new BinaryExpression(expr, tok.toString(), expr2);}
+	)*
+	{return expr;}
 }
 
-void MultiplicativeExpression() :
-{}
+Expression MultiplicativeExpression() :
 {
-	UnaryExpression() ( ( "*" | "/" | "%" ) UnaryExpression() )*
+	Expression expr = null, expr2;
+	Token tok;
+}
+{
+	expr = UnaryExpression()
+	(
+		(tok = "*" | tok = "/" | tok = "%" )
+		expr2 = UnaryExpression()
+
+		{expr = new BinaryExpression(expr, tok.toString(), expr2);}
+	)*
+	{return expr;}
 }
 
-void UnaryExpression() :
-{}
+Expression UnaryExpression() :
 {
-	  ( "-" ) UnaryExpression() | "!" UnaryExpression() | PrimaryPrefix()
+	Expression expr = null;
+	Token tok;
+}
+{
+	  (
+			(tok = "-" | tok = "!")
+			expr = UnaryExpression()
+			{expr = new UnaryExpression(tok.toString(), expr);}
+		|
+			expr = PrimaryPrefix()
+	  )
+	  {return expr;}
 }
 
-void UnaryExpressionNotPlusMinus() :
-{}
+Expression UnaryExpressionNotPlusMinus() :
 {
-	  ( "!" ) UnaryExpression()
-	| PrimaryPrefix()
+	Expression expr = null;
+}
+{
+	(  ( "!" ) UnaryExpression()
+	| expr = PrimaryPrefix())
+
+	{return expr;}
 }
 
-void PrimaryPrefix() :
-{}
+Expression PrimaryPrefix() :
 {
-	  Literal()
-	| VariableDeclaratorId()
-	| "(" Expression() ")"
+	Expression expr = null;
+	String name;
+}
+{
+	(
+			expr = Literal()
+		|
+			expr = VariableDeclaratorId()
+		| "(" expr = Expression() ")"
+	)
+
+	{return expr;}
 }
 
-void Literal() :
-{}
+Constant Literal() :
 {
-	  <INTEGER_LITERAL>
-	| <FLOATING_POINT_LITERAL>
-	| <STRING_LITERAL>
-	| <TRUE>
-	| <FALSE>
+	Token token;
+	Constant c = null;
+}
+{
+	(
+	    token = <INTEGER_LITERAL>
+        {c = new Constant(token.toString(), Type.INT);}
+	|
+	    token = <FLOATING_POINT_LITERAL>
+	    {c = new Constant(token.toString(), Type.FLOAT);}
+	|
+	    token = <STRING_LITERAL>
+	    {c = new Constant(token.toString(), Type.STRING);}
+	|
+	    (token = <TRUE> | token = <FALSE>)
+        {c = new Constant(token.toString().equalsIgnoreCase("true"), Type.BOOLEAN);}
+	)
+
+	{return c;}
 }
 
 /*
  * Statement syntax follows.
  */
-void Statement() :
-{}
+Statement Statement() :
 {
-	  ";"
-	| LocalVariableDeclaration() ";"
+	Statement s = null;
+	Expression expr;
+}
+{
+	(
+		  ";"
+	| s = LocalVariableDeclaration() ";"
 	| IfStatement()
 	| ForStatement()
-	| WriteStatement()
-	| ReadStatement()
-	| Expression() ";"
+	| s = WriteStatement()
+	| s = ReadStatement()
+	| expr = Expression() ";" {return new ExpressionStatement(expr);}
+
+)
+	{
+		return s;
+		/*PrintStatement s = new PrintStatement();
+		s.getExpressions().add(new Constant(1, Type.INT));
+		return s;*/
+	}
 }
 
-void LocalVariableDeclaration() :
-{}
+VariableDeclaration LocalVariableDeclaration() :
 {
-	Type() VariableDeclaratorId() ( "," VariableDeclaratorId() )*
+    VariableDeclaration decl;
+    Variable var;
+    Type type;
+}
+{
+	type = Type()
+	var = VariableDeclaratorId()
+	{decl = new VariableDeclaration(type, var);}
+	(
+	 ","
+	 var = VariableDeclaratorId()
+	 {decl.getVariables().add(var);}
+	)*
+	{return decl;}
 }
 
 void IfStatement() :
@@ -293,30 +411,79 @@ void ForStatement() :
 void ForInit() :
 {}
 {
-    StatementExpressionList()
+	ExpressionList()
 }
 
-void StatementExpressionList() :
-{}
+List<Expression> ExpressionList() :
 {
-	Expression() ( "," Expression() )*
+    List<Expression> exprs = new ArrayList<Expression>();
+    Expression expr;
+}
+{
+	expr = Expression()
+	{exprs.add(expr);}
+
+	(
+	    ","
+	    expr = Expression()
+	    {exprs.add(expr);}
+	)*
+
+	{return exprs;}
 }
 
 void ForUpdate() :
 {}
 {
-	StatementExpressionList()
+	ExpressionList()
 }
 
 // IO Commands
-void WriteStatement() :
-{}
+WriteStatement WriteStatement() :
 {
-	"write" StatementExpressionList() ";"
+	WriteStatement s = new WriteStatement();
+	List<Expression> expressions;
+}
+{
+	"write"
+	expressions = ExpressionList()
+	 ";"
+
+	{
+		s.getExpressions().addAll(expressions);
+		return s;
+	}
 }
 
-void ReadStatement() :
-{}
+List<Variable> VariableList():
 {
-	"read" StatementExpressionList() ";"
+    Variable var;
+    List<Variable> vars = new ArrayList<Variable>();
+}
+{
+    var = VariableDeclaratorId()
+    {vars.add(var);}
+
+    (
+        ","
+        var = VariableDeclaratorId()
+        {vars.add(var);}
+    )*
+    {return vars;}
+}
+
+ReadStatement ReadStatement() :
+{
+    ReadStatement s = new ReadStatement();
+    List<Variable> vars;
+}
+{
+	"read"
+	vars = VariableList()
+	";"
+
+	{
+	    s.getVariables().addAll(vars);
+	    return s;
+	}
 }
