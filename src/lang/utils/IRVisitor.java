@@ -23,6 +23,6 @@ public interface  IRVisitor {
     void visit(ReadStatement st);
     void visit(UnaryExpression exp);
     void visit(Variable exp);
-    void visit(WhileStatement st);
+    void visit(ForStatement st);
 	void visit(VariableDeclaration decl);
 }

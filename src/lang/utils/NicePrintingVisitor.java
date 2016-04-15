@@ -114,12 +114,13 @@ public class NicePrintingVisitor implements IRVisitor {
     }
 
     @Override
-    public void visit(WhileStatement st) {
-
+    public void visit(ForStatement st) {
         String body = data.pop();
+        String afterthought = data.pop();
         String condition = data.pop();
+	    String initialization = data.pop();
 
-        String result = "while (" + condition + ") " + body;
+        String result = "for(" + initialization + "; " + condition + "; " + afterthought + ") " + body;
         data.push(result);
     }
 

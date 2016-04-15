@@ -377,20 +377,14 @@ Statement Statement() :
 {
 	(
 		  ";"
-	| s = LocalVariableDeclaration() ";"
-	| IfStatement()
-	| ForStatement()
-	| s = WriteStatement()
-	| s = ReadStatement()
-	| expr = Expression() ";" {return new ExpressionStatement(expr);}
-
-)
-	{
-		return s;
-		/*PrintStatement s = new PrintStatement();
-		s.getExpressions().add(new Constant(1, Type.INT));
-		return s;*/
-	}
+        | s = LocalVariableDeclaration() ";"
+        | s = IfStatement()
+        | s = ForStatement()
+        | s = WriteStatement()
+        | s = ReadStatement()
+        | expr = Expression() ";" {return new ExpressionStatement(expr);}
+    )
+	{return s;}
 }
 
 VariableDeclaration LocalVariableDeclaration() :
@@ -411,25 +405,27 @@ VariableDeclaration LocalVariableDeclaration() :
 	{return decl;}
 }
 
-void IfStatement() :
-{}
+IfStatement IfStatement() :
 {
-	"if" Expression() <THEN> Statements() [ <ELSE> Statements() ] <END> ";"
+    Expression condition;
+    BlockOfStatements ifStatements, elseStatements = null;
+}
+{
+	"if" condition = Expression() <THEN> ifStatements = Statements() [ <ELSE> elseStatements = Statements() ] <END> ";"
+	{return new IfStatement(condition, ifStatements, elseStatements);}
 }
 
-void ForStatement() :
-{}
+ForStatement ForStatement() :
 {
-	"for" "(" [ ForInit() ] ";" [ Expression() ] ";" [ ForUpdate() ] ")"
+    Expression initialization = null, condition = null, afterthought = null;
+    BlockOfStatements body;
+}
+{
+	"for" "(" [ initialization = Expression() ] ";" [ condition = Expression() ] ";" [ afterthought = Expression() ] ")"
 	<BEGIN>
-	Statements()
+	body = Statements()
 	<END>";"
-}
-
-void ForInit() :
-{}
-{
-	ExpressionList()
+	{return new ForStatement(initialization, condition, afterthought, body);}
 }
 
 List<Expression> ExpressionList() :
@@ -448,12 +444,6 @@ List<Expression> ExpressionList() :
 	)*
 
 	{return exprs;}
-}
-
-void ForUpdate() :
-{}
-{
-	ExpressionList()
 }
 
 // IO Commands

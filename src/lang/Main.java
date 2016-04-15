@@ -12,9 +12,9 @@ public class Main {
 		IRVisitor visitor = new NicePrintingVisitor();
 
 		//(new Constant(5, Type.INT)).accept(visitor);
-		//LangParser p = new LangParser(new FileInputStream("tests/t2.txt"));
+		LangParser p = new LangParser(new FileInputStream("tests/t3.txt"));
 		//LangParser p = new LangParser(new FileInputStream("x"));
-		LangParser p = new LangParser(System.in);
+		//LangParser p = new LangParser(System.in);
 		p.Program().accept(visitor);
 
 		System.out.println(visitor.toString());

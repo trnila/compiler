@@ -65,7 +65,7 @@ public class TypeChecking implements IRVisitor{
     }
 
     @Override
-    public void visit(WhileStatement st) {
+    public void visit(ForStatement st) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
