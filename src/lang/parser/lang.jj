@@ -4,6 +4,8 @@ options {
 }
 
 PARSER_BEGIN(LangParser)
+package lang.parser;
+
 import java.io.*;
 
 public class LangParser {
