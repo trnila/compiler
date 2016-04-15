@@ -29,7 +29,7 @@
 		<mkdir dir="build/jar"/>
 		<jar destfile="build/jar/langcompiler.jar" basedir="build/classes">
 			<manifest>
-				<attribute name="Main-Class" value="lang.parser.LangParser"/>
+				<attribute name="Main-Class" value="lang.Main"/>
 			</manifest>
 		</jar>
 	</target>
