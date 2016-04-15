@@ -210,45 +210,73 @@ AssignmentExpression Assignment() :
 Expression ConditionalExpression() :
 {
 	Expression expr = null;
+	Expression ifExpr, elseExpr;
 }
 {
-	expr = ConditionalOrExpression() [ "?" Expression() ":" ConditionalExpression() ]
+	expr = ConditionalOrExpression()
+	[
+	    "?" ifExpr = ConditionalExpression() ":" elseExpr = ConditionalExpression()
+	    {expr = new TernaryExpression(expr, ifExpr, elseExpr);}
+	]
 	{return expr;}
 }
 
 Expression ConditionalOrExpression() :
 {
-	Expression expr = null;
+	Expression expr = null, expr2;
 }
 {
-	expr = ConditionalAndExpression() ( "||" ConditionalAndExpression() )*
+	expr = ConditionalAndExpression()
+	(
+	    "||"
+	    expr2 = ConditionalAndExpression()
+	    {expr = new BinaryExpression(expr, "||", expr2);}
+	)*
 	{return expr;}
 }
 
 Expression ConditionalAndExpression() :
 {
-	Expression expr = null;
+	Expression expr = null, expr2;
 }
 {
-	expr = EqualityExpression() ( "&&" EqualityExpression() )*
+	expr = EqualityExpression()
+	(
+	    "&&"
+	    expr2 = EqualityExpression()
+	    {expr = new BinaryExpression(expr, "&&", expr2);}
+	 )*
 	{return expr;}
 }
 
 Expression EqualityExpression() :
 {
-	Expression expr = null;
+	Expression expr = null, expr2;
+	Token tok;
 }
 {
-	expr = RelationalExpression() ( ( "==" | "!=" ) RelationalExpression() )*
+	expr = RelationalExpression()
+	(
+	    (tok = "==" | tok = "!=" )
+	    expr2 = RelationalExpression()
+	    {expr = new BinaryExpression(expr, tok.toString(), expr2);}
+	)*
+
 	{return expr;}
 }
 
 Expression RelationalExpression() :
 {
-	Expression expr = null;
+	Expression expr = null, expr2;
+	Token tok;
 }
 {
-	expr = AdditiveExpression() ( ( "<" | ">" | "<=" | ">=" ) AdditiveExpression() )*
+	expr = AdditiveExpression()
+	(
+	    (tok = "<" | tok = ">" | tok = "<=" | tok = ">=" )
+	    expr2 =AdditiveExpression()
+	    {expr = new BinaryExpression(expr, tok.toString(), expr2);}
+	)*
 	{return expr;}
 }
 
@@ -300,17 +328,6 @@ Expression UnaryExpression() :
 	  {return expr;}
 }
 
-Expression UnaryExpressionNotPlusMinus() :
-{
-	Expression expr = null;
-}
-{
-	(  ( "!" ) UnaryExpression()
-	| expr = PrimaryPrefix())
-
-	{return expr;}
-}
-
 Expression PrimaryPrefix() :
 {
 	Expression expr = null;
@@ -318,9 +335,8 @@ Expression PrimaryPrefix() :
 }
 {
 	(
-			expr = Literal()
-		|
-			expr = VariableDeclaratorId()
+		  expr = Literal()
+		| expr = VariableDeclaratorId()
 		| "(" expr = Expression() ")"
 	)
 
