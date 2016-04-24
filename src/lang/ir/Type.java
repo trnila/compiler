@@ -20,4 +20,8 @@ public enum Type {
         if (name.compareToIgnoreCase("boolean")==0) return BOOLEAN;
         return ERROR;
     }
+
+    public static boolean isValid(Type t) {
+        return t != ERROR;
+    }
 }

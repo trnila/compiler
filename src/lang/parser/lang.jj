@@ -1,6 +1,7 @@
 options {
   JAVA_UNICODE_ESCAPE = true;
   DEBUG_PARSER = false;
+  STATIC = false;
 }
 
 PARSER_BEGIN(LangParser)
@@ -396,11 +397,17 @@ VariableDeclaration LocalVariableDeclaration() :
 {
 	type = Type()
 	var = VariableDeclaratorId()
-	{decl = new VariableDeclaration(type, var);}
+	{
+		var.setType(type);
+		decl = new VariableDeclaration(type, var);
+	}
 	(
 	 ","
 	 var = VariableDeclaratorId()
-	 {decl.getVariables().add(var);}
+	 {
+	    var.setType(type);
+	    decl.getVariables().add(var);
+	 }
 	)*
 	{return decl;}
 }

@@ -1,9 +1,10 @@
 package lang;
 
-import lang.ir.*;
+import lang.ir.BlockOfStatements;
 import lang.parser.LangParser;
 import lang.utils.IRVisitor;
 import lang.utils.NicePrintingVisitor;
+import lang.utils.TypeChecking;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -20,7 +21,10 @@ public class Main {
 		}
 
 		LangParser p = new LangParser(is);
-		p.Program().accept(visitor);
+		BlockOfStatements program = p.Program();
+		program.accept(visitor);
+		program.accept(new TypeChecking());
+
 		System.out.println(visitor.toString());
 	}
 }

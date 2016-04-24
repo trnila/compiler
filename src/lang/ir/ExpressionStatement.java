@@ -18,4 +18,8 @@ public class ExpressionStatement extends Statement {
 	public String toString() {
 		return expr.toString();
 	}
+
+	public Expression getExpr() {
+		return expr;
+	}
 }
