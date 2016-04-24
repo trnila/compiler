@@ -93,22 +93,21 @@ public class TypeChecking implements IRVisitor {
 
 	@Override
     public void visit(IfStatement st) {
-
+		if(st.getCondition().getType() != Type.BOOLEAN) {
+			error("if must be boolean");
+		}
     }
 
     @Override
     public void visit(Constant exp) {
-
     }
 
     @Override
     public void visit(WriteStatement st) {
-
     }
 
     @Override
     public void visit(ReadStatement st) {
-
     }
 
     @Override
