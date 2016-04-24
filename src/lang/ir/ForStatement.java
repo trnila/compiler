@@ -41,10 +41,10 @@ public class ForStatement extends Statement{
 
 	@Override
     public void accept(IRVisitor visitor) {
-		initialization.accept(visitor);
+		/*initialization.accept(visitor);
         condition.accept(visitor);
 		afterthought.accept(visitor);
-        body.accept(visitor);
+        body.accept(visitor);*/
         visitor.visit(this);
     }
     

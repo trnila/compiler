@@ -144,6 +144,8 @@ public class TypeChecking implements IRVisitor {
 
     @Override
     public void visit(ForStatement st) {
+	    st.getCondition().accept(this);
+
 		if(st.getCondition().getType() != Type.BOOLEAN) {
 			error("expected boolean in for");
 		}

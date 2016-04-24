@@ -35,12 +35,12 @@ public class IfStatement extends Statement {
 
     @Override
     public void accept(IRVisitor visitor) {
-        condition.accept(visitor);
+        /*condition.accept(visitor);
         thenPart.accept(visitor);
         if(elsePart != null) {
 	        elsePart.accept(visitor);
         }
-
+*/
         visitor.visit(this);
     }
 
