@@ -5,17 +5,6 @@ public class TypeChecking implements IRVisitor {
 	public boolean valid = true;
 	private SymbolTable symbols = new SymbolTable();
 
-	private void error(String message) {
-		System.out.println(message);
-		valid = false;
-	}
-
-	public boolean isValid() {
-		return valid;
-	}
-
-
-
     @Override
     public void visit(AssignmentExpression st) {
 	    Variable var = st.getVariable();
@@ -85,19 +74,9 @@ public class TypeChecking implements IRVisitor {
 	    error("unexpected " + exp.toString());
     }
 
-	private boolean areSame(Type left, Type right) {
-		if(left == right) {
-			return true;
-		}
-
-		return (left == Type.FLOAT && right == Type.INT) ||
-				(left == Type.INT && right == Type.FLOAT);
-	}
-
 	@Override
     public void visit(BlockOfStatements st) {
-
-    }
+	}
 
     @Override
     public void visit(TernaryExpression exp) {
@@ -111,17 +90,6 @@ public class TypeChecking implements IRVisitor {
 
 	    error("invalid ternary");
     }
-
-	private Type resultingType(Type left, Type right) {
-		if(areSame(left, right)) {
-			if(left == Type.FLOAT || right == Type.FLOAT) {
-				return Type.FLOAT;
-			}
-			return left;
-		}
-
-		return Type.ERROR;
-	}
 
 	@Override
     public void visit(IfStatement st) {
@@ -192,4 +160,33 @@ public class TypeChecking implements IRVisitor {
 		    }
 	    }
     }
+
+	private boolean areSame(Type left, Type right) {
+		if(left == right) {
+			return true;
+		}
+
+		return (left == Type.FLOAT && right == Type.INT) ||
+				(left == Type.INT && right == Type.FLOAT);
+	}
+
+	private Type resultingType(Type left, Type right) {
+		if(areSame(left, right)) {
+			if(left == Type.FLOAT || right == Type.FLOAT) {
+				return Type.FLOAT;
+			}
+			return left;
+		}
+
+		return Type.ERROR;
+	}
+
+	private void error(String message) {
+		System.out.println(message);
+		valid = false;
+	}
+
+	public boolean isValid() {
+		return valid;
+	}
 }
