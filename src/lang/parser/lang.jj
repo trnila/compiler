@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import lang.ir.*;
 
 public class LangParser {
+	private SymbolTable symbols = new SymbolTable();
+
 	public static void main(String args[]) throws Exception {
 		InputStream is;
 		if(args.length < 1) {
