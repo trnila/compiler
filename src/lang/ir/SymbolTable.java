@@ -21,4 +21,7 @@ public class SymbolTable {
     public Variable load(String name) {
         return data.get(name);
     }
+    public boolean exists(String name) {
+	    return data.containsKey(name);
+    }
 }

@@ -16,9 +16,9 @@ public class VariableDeclaration extends Statement {
 
 	@Override
 	public void accept(IRVisitor visitor) {
-		for(Variable var: variables) {
+		/*for(Variable var: variables) {
 			visitor.visit(var);
-		}
+		}*/
 		visitor.visit(this);
 	}
 

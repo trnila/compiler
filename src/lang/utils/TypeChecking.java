@@ -3,6 +3,7 @@ import lang.ir.*;
 
 public class TypeChecking implements IRVisitor {
 	public boolean valid = true;
+	private SymbolTable symbols = new SymbolTable();
 
 	private void error(String message) {
 		System.out.println(message);
@@ -17,6 +18,20 @@ public class TypeChecking implements IRVisitor {
 
     @Override
     public void visit(AssignmentExpression st) {
+	    Variable var = st.getVariable();
+
+		if(!symbols.exists(var.getName())) {
+			error("variable does not exists!");
+			return;
+		}
+
+	    Type varType = symbols.load(var.getName()).getType();
+	    if(!areSame(varType, st.getExpression().getType())) {
+		    error("could not assign");
+		    return;
+	    }
+
+	    st.setType(varType);
     }
 
     @Override
@@ -152,6 +167,12 @@ public class TypeChecking implements IRVisitor {
 
     @Override
     public void visit(Variable exp) {
+		if(!symbols.exists(exp.getName())) {
+			error("variable does not exists!");
+			exp.setType(Type.ERROR);
+		} else {
+			exp.setType(symbols.load(exp.getName()).getType());
+		}
     }
 
     @Override
@@ -163,5 +184,12 @@ public class TypeChecking implements IRVisitor {
 
     @Override
     public void visit(VariableDeclaration decl) {
+	    for(Variable var: decl.getVariables()) {
+		    if(symbols.exists(var.getName())) {
+			    error("Variable already exists!");
+		    } else {
+			    symbols.save(var);
+		    }
+	    }
     }
 }
