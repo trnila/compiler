@@ -162,7 +162,27 @@ public class ByteCodeGenerator implements IRVisitor {
 
 	@Override
 	public void visit(VariableDeclaration decl) {
+		String val;
+		switch(decl.getType()) {
+			case INT:
+				val = "I0";
+				break;
+			case FLOAT:
+				val = "F0.0";
+				break;
+			case STRING:
+				val = "S";
+				break;
+			case BOOLEAN:
+				val = "B0";
+				break;
+			default:
+				throw new UnsupportedOperationException("unknown type");
+		}
 
+		for(Variable var: decl.getVariables()){
+			out.println("push " + val + "\nsave " + var.getName());
+		}
 	}
 
 	private char toChar(Type type) {
