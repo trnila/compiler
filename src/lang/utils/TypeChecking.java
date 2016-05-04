@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TypeChecking implements IRVisitor {
-	public boolean valid = true;
 	private SymbolTable symbols = new SymbolTable();
 	private List<Error> errors = new ArrayList<>();
 
@@ -21,7 +20,7 @@ public class TypeChecking implements IRVisitor {
 
 	    Type varType = symbols.load(var.getName()).getType();
 	    if(!areSame(varType, st.getExpression().getType())) {
-		    error("could not assign");
+		    error(new VariableAssignError("ff", var, st.getExpression().getType()));
 		    return;
 	    }
 
@@ -230,7 +229,12 @@ public class TypeChecking implements IRVisitor {
 	    st.getCondition().accept(this);
 
 		if(st.getCondition().getType() != Type.BOOLEAN) {
-			error("expected boolean in for");
+			error(new BadTypeError(
+					"for condition",
+					st.getCondition(),
+					new Type[]{Type.BOOLEAN},
+					st.getCondition().getType()
+			));
 		}
 
 	    if(st.getBody() != null) {
@@ -242,7 +246,13 @@ public class TypeChecking implements IRVisitor {
     public void visit(VariableDeclaration decl) {
 	    for(Variable var: decl.getVariables()) {
 		    if(symbols.exists(var.getName())) {
-			    error("Variable already exists!");
+			    Variable prev = symbols.load(var.getName());
+
+			    error(new VariableRedeclaredError(
+					    "Variable already exists!",
+					    var,
+					    prev
+			    ));
 		    } else {
 			    symbols.save(var);
 		    }
@@ -269,18 +279,12 @@ public class TypeChecking implements IRVisitor {
 		return Type.ERROR;
 	}
 
-	private void error(String message) {
-		System.out.println(message);
-		valid = false;
-	}
-
 	private void error(Error error) {
 		errors.add(error);
-		valid = false;
 	}
 
 	public boolean isValid() {
-		return valid;
+		return errors.size() == 0;
 	}
 
 	public List<Error> getErrors() {
