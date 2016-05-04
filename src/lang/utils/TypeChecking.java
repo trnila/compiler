@@ -213,7 +213,7 @@ public class TypeChecking implements IRVisitor {
     @Override
     public void visit(Variable exp) {
 		if(!symbols.exists(exp.getName())) {
-			error("variable does not exists!");
+			error(new VariableError("variable not exists", exp));
 			exp.setType(Type.ERROR);
 		} else {
 			exp.setType(symbols.load(exp.getName()).getType());

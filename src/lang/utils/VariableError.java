@@ -11,4 +11,9 @@ public class VariableError extends Error {
 	public Variable getVariable() {
 		return (Variable) getNode();
 	}
+
+	@Override
+	public String toString() {
+		return "variable " + getVariable().getName() + " not exists";
+	}
 }

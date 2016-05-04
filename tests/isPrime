@@ -10,7 +10,7 @@ if n <= 0 then
 else
 	int i;
 	for (i=0; i<32; i = i+1) begin
-		max = (max + square / max) / 2;
+		max = (max + n / max) / 2;
 	end;
 end;
 
@@ -24,4 +24,4 @@ for(x = 1; x <= max; x = x + 1) begin
 	end;
 end;
 
-write n, " is ", isPrime ? "" : "not", "prime";
+write n, " is ", isPrime ? " " : "not", "prime";

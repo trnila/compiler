@@ -40,7 +40,6 @@ public class Main {
 		TypeChecking checking = new TypeChecking();
 		program.accept(checking);
 
-
 		for(lang.utils.Error error: checking.getErrors()) {
 			int lin = error.getNode().getLine();
 
