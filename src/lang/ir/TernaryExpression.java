@@ -34,9 +34,9 @@ public class TernaryExpression extends Expression{
 
     @Override
     public void accept(IRVisitor visitor) {
-        condition.accept(visitor);
-        leftPart.accept(visitor);
-        rightPart.accept(visitor);
+        //condition.accept(visitor);
+        //leftPart.accept(visitor);
+        //rightPart.accept(visitor);
 
         visitor.visit(this);
     }

@@ -77,7 +77,16 @@ public class ByteCodeGenerator implements IRVisitor {
 
 	@Override
 	public void visit(TernaryExpression exp) {
+		int failLabel = label++;
+		int endLabel = label++;
 
+		exp.getCondition().accept(this);
+		out.println("fjmp " + failLabel);
+		exp.getLeftPart().accept(this);
+		out.println("jmp " + endLabel);
+		out.println("label " + failLabel);
+		exp.getRightPart().accept(this);
+		out.println("label " + endLabel);
 	}
 
 	@Override

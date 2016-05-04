@@ -118,6 +118,11 @@ public class TypeChecking implements IRVisitor {
 
     @Override
     public void visit(TernaryExpression exp) {
+	    //TODO: remove
+	    exp.getCondition().accept(this);
+	    exp.getLeftPart().accept(this);
+	    exp.getRightPart().accept(this);
+
 	    Type left = exp.getLeftPart().getType();
 	    Type right = exp.getRightPart().getType();
 
