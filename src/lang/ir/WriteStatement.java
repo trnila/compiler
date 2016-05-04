@@ -15,7 +15,8 @@ public class WriteStatement extends Statement {
 
     ArrayList<Expression> expressions = new ArrayList<Expression>();
 
-    public WriteStatement() {
+    public WriteStatement(int line, int column) {
+        super(line, column);
     }
 
     public ArrayList<Expression> getExpressions() {

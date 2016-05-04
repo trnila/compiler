@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="lang" default="test">
+<project name="lang" default="jar">
 	<property file="build.properties"/>
 
 	<condition property="javacc.home" value="/usr/share/java/javacc/">
@@ -32,6 +32,19 @@
 				<attribute name="Main-Class" value="lang.Main"/>
 			</manifest>
 		</jar>
+	</target>
+
+	<target name="junit" depends="compile">
+		<junit haltonfailure="yes" printsummary="on" showoutput="on">
+			<classpath>
+				<pathelement location="./build/classes"/>
+				<fileset dir="./lib/" includes="junit-4.8.1.jar"/>
+			</classpath>
+
+			<formatter type="brief" usefile="false" />
+
+			<test name="lang.test.TypeCheckingTest" />
+		</junit>
 	</target>
 
 	<target name="test" depends="jar">

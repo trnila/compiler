@@ -17,10 +17,7 @@ public class Read implements IInstruction {
 	@Override
 	public void execute(Env env, Program program) {
 		Value v = null;
-
 		Scanner s = env.getInputStream();
-
-
 
 		switch(type) {
 			case INT:
@@ -40,5 +37,10 @@ public class Read implements IInstruction {
 		}
 
 		env.getStack().push(v);
+	}
+
+	@Override
+	public String toString() {
+		return "read " + type;
 	}
 }

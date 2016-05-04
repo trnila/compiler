@@ -11,10 +11,24 @@ import lang.utils.IRVisitor;
  * @author beh01
  */
 public abstract class Node {
+    private int line;
+	private int column;
 
-    public abstract void accept(IRVisitor visitor);
+	public Node(int line, int column) {
+		this.line = line;
+		this.column = column;
+	}
+
+	public abstract void accept(IRVisitor visitor);
    
     @Override
     public abstract String toString();
 
+	public int getLine() {
+		return line;
+	}
+
+	public int getColumn() {
+		return column;
+	}
 }

@@ -1,16 +1,21 @@
 package lang.utils;
 import lang.ir.*;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
 public class TypeChecking implements IRVisitor {
 	public boolean valid = true;
 	private SymbolTable symbols = new SymbolTable();
+	private List<Error> errors = new ArrayList<>();
 
     @Override
     public void visit(AssignmentExpression st) {
 	    Variable var = st.getVariable();
 
 		if(!symbols.exists(var.getName())) {
-			error("variable does not exists!");
+			error(new VariableError("variable not exists", var));
 			return;
 		}
 
@@ -35,21 +40,41 @@ public class TypeChecking implements IRVisitor {
 		    case "/":
 			    if(left == Type.INT || left == Type.FLOAT) {
 				    exp.setType(left == Type.FLOAT || right == Type.FLOAT ? Type.FLOAT : Type.INT);
-				    return;
+			    } else {
+				    error(
+						    new BadTypeError(
+								    exp.getOp(),
+								    exp,
+								    new Type[] {Type.INT, Type.FLOAT},
+								    right
+						    )
+				    );
 			    }
-			    break;
+			    return;
 		    case "%":
 			    if(left == Type.INT && left.equals(right)) {
 				    exp.setType(left);
-				    return;
+			    } else {
+				    error(new BadTypeError(
+							exp.getOp(),
+							exp,
+							new Type[] {Type.INT},
+						    left == Type.INT ? right : left
+				    ));
 			    }
-			    break;
+				return;
 		    case ".":
 			    if(left == Type.STRING && left.equals(right)) {
 				    exp.setType(Type.STRING);
-				    return;
+			    } else {
+				    error(new BadTypeError(
+						    exp.getOp(),
+						    exp,
+						    new Type[] {Type.STRING},
+						    left == Type.STRING ? right : left
+				    ));
 			    }
-			    break;
+			    return;
 
 		    case "<":
 		    case "<=":
@@ -59,19 +84,32 @@ public class TypeChecking implements IRVisitor {
 		    case "!=":
 			    if(Type.isValid(left) && areSame(left, right)) {
 				    exp.setType(Type.BOOLEAN);
-				    return;
+			    } else {
+				    error(new BadTypeError(
+						    exp.getOp(),
+						    exp,
+						    new Type[]{left},
+						    right
+				    ));
 			    }
-			    break;
+
+			    return;
 		    case "&&":
 		    case "||":
 			    if(left == Type.BOOLEAN && left == right) {
 				    exp.setType(Type.BOOLEAN);
-				    return;
+			    } else {
+				    error(new BadTypeError(
+						    exp.getOp(),
+						    exp,
+						    new Type[] {Type.BOOLEAN},
+						    left == Type.BOOLEAN ? right : left
+				    ));
 			    }
-			    break;
+			    return;
 	    }
 
-	    error("unexpected " + exp.toString());
+	    throw new RuntimeException("unreachable code!");
     }
 
 	@Override
@@ -83,18 +121,41 @@ public class TypeChecking implements IRVisitor {
 	    Type left = exp.getLeftPart().getType();
 	    Type right = exp.getRightPart().getType();
 
-		if(exp.getCondition().getType() == Type.BOOLEAN && areSame(left, right)) {
-			exp.setType(resultingType(left, right));
-			return;
-		}
+	    boolean failed = false;
+	    if(exp.getCondition().getType() != Type.BOOLEAN) {
+		    failed = true;
+		    error(new BadTypeError(
+				    "ternary",
+				    exp,
+				    new Type[]{Type.BOOLEAN},
+				    exp.getCondition().getType()
+			));
+	    }
 
-	    error("invalid ternary");
+	    if(!areSame(left, right)) {
+		    failed = true;
+		    error(new BadTypeError(
+				    "ternary return value",
+				    exp,
+				    new Type[]{left},
+				    right
+		    ));
+	    }
+
+	    exp.setType(failed ? Type.ERROR : resultingType(left, right));
     }
 
 	@Override
     public void visit(IfStatement st) {
+		st.getCondition().accept(this);
+
 		if(st.getCondition().getType() != Type.BOOLEAN) {
-			error("if must be boolean");
+			error(new BadTypeError(
+					"if",
+					st.getCondition(),
+					new Type[]{Type.BOOLEAN},
+					st.getCondition().getType()
+			));
 		}
     }
 
@@ -118,18 +179,30 @@ public class TypeChecking implements IRVisitor {
 		    case "-":
 			    if(target == Type.INT || target == Type.FLOAT) {
 				    exp.setType(target);
-				    return;
+			    } else {
+				    error(new BadTypeError(
+						    "unary",
+						    exp,
+						    new Type[] {Type.INT, Type.FLOAT},
+						    target
+				    ));
 			    }
-			    break;
+			    return;
 		    case "!":
 			    if(target == Type.BOOLEAN) {
-				    exp.setType(Type.BOOLEAN);
-				    return;
+					exp.setType(Type.BOOLEAN);
+			    } else {
+				    error(new BadTypeError(
+						    "unary",
+						    exp,
+						    new Type[] {Type.BOOLEAN},
+						    target
+				    ));
 			    }
-			    break;
+			    return;
 	    }
 
-		error("invalid unary expr");
+		//assert(0, "unreachable code");
     }
 
     @Override
@@ -186,8 +259,18 @@ public class TypeChecking implements IRVisitor {
 		System.out.println(message);
 		valid = false;
 	}
+	private void error(String message, Node node) {}
+
+	private void error(Error error) {
+		errors.add(error);
+		valid = false;
+	}
 
 	public boolean isValid() {
 		return valid;
+	}
+
+	public List<Error> getErrors() {
+		return errors;
 	}
 }

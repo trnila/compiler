@@ -14,11 +14,14 @@ public class InstructionLoader {
 		HashMap<String, ILoader> loaders = new HashMap<>();
 		loaders.put("push", new PushLoader());
 
+		loaders.put("uminus", new GenericLoader(Uminus.class));
+
 		loaders.put("add", new ParamLoader(MathInstruction.class, "add"));
 		loaders.put("sub", new ParamLoader(MathInstruction.class, "sub"));
 		loaders.put("div", new ParamLoader(MathInstruction.class, "div"));
 		loaders.put("mul", new ParamLoader(MathInstruction.class, "mul"));
 		loaders.put("mod", new ParamLoader(MathInstruction.class, "mod"));
+		loaders.put("concat", new GenericLoader(Concat.class));
 
 		loaders.put("label", new LabelLoader());
 		loaders.put("jmp", new GenericLoader(Jmp.class));
@@ -30,6 +33,14 @@ public class InstructionLoader {
 		loaders.put("write", new GenericLoader(Write.class));
 		loaders.put("read", new ReadLoader());
 
+		loaders.put("lt", new ParamLoader(Relational.class, "lt"));
+		loaders.put("gt", new ParamLoader(Relational.class, "gt"));
+		loaders.put("eq", new ParamLoader(Relational.class, "eq"));
+
+		loaders.put("or", new ParamLoader(Logical.class, "or"));
+		loaders.put("and", new ParamLoader(Logical.class, "and"));
+		loaders.put("not", new GenericLoader(Not.class));
+
 		Program program = new Program();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 		String line;
@@ -37,7 +48,9 @@ public class InstructionLoader {
 			while((line = reader.readLine()) != null) {
 				int end = line.indexOf(' ');
 				String instruction = end > 0 ? line.substring(0, end) : line;
-				if(!loaders.containsKey(instruction)) {
+				if(instruction.startsWith("#!")) {
+					continue;
+				} else if(!loaders.containsKey(instruction)) {
 					throw new RuntimeException("unknown instruction " + instruction);
 				}
 

@@ -19,4 +19,9 @@ public class Fjmp implements IInstruction {
 			env.jump(program.getPcFor(destination) - 1);
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "fjmp " + destination;
+	}
 }

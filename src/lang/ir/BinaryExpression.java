@@ -16,7 +16,8 @@ public class BinaryExpression extends Expression {
     private String op;
     private Expression right;
 
-    public BinaryExpression(Expression left, String op, Expression right) {
+    public BinaryExpression(int line, int column, Expression left, String op, Expression right) {
+        super(line, column);
         this.left = left;
         this.op = op;
         this.right = right;

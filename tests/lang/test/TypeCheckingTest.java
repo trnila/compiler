@@ -4,6 +4,7 @@ import lang.ir.BlockOfStatements;
 import lang.ir.ExpressionStatement;
 import lang.ir.Type;
 import lang.parser.LangParser;
+import lang.utils.BadTypeError;
 import lang.utils.TypeChecking;
 import org.apache.tools.ant.filters.StringInputStream;
 import org.junit.Assert;
@@ -20,6 +21,10 @@ public class TypeCheckingTest {
 
 		public boolean isValid() {
 			return checking.isValid();
+		}
+
+		public lang.utils.Error getFirstError() {
+			return checking.getErrors().get(0);
 		}
 
 		public Type getExprType() {
@@ -44,6 +49,10 @@ public class TypeCheckingTest {
 		analyse = analyzeProgram("1.0+2.0-6.4*7.2/2.2;");
 		Assert.assertTrue(analyse.checking.isValid());
 		Assert.assertSame(Type.FLOAT, analyse.getExprType());
+
+		analyse = analyzeProgram("true && False;");
+		Assert.assertTrue(analyse.checking.isValid());
+		Assert.assertSame(Type.BOOLEAN, analyse.getExprType());
 
 		analyse = analyzeProgram("\"ahoj\"*5.0;");
 		Assert.assertFalse(analyse.checking.isValid());
@@ -168,12 +177,21 @@ public class TypeCheckingTest {
 
 		analyse = analyzeProgram("-True;");
 		Assert.assertFalse(analyse.checking.isValid());
+		Assert.assertEquals("unary requires INT, FLOAT but BOOLEAN given", analyse.getFirstError().toString());
+		Assert.assertEquals(1, analyse.getFirstError().getNode().getLine());
+		Assert.assertEquals(1, analyse.getFirstError().getNode().getColumn());
 
 		analyse = analyzeProgram("-\"str\";");
 		Assert.assertFalse(analyse.checking.isValid());
+		Assert.assertEquals("unary requires INT, FLOAT but STRING given", analyse.getFirstError().toString());
+		Assert.assertEquals(1, analyse.getFirstError().getNode().getLine());
+		Assert.assertEquals(1, analyse.getFirstError().getNode().getColumn());
 
 		analyse = analyzeProgram("!20;");
 		Assert.assertFalse(analyse.checking.isValid());
+		Assert.assertEquals("unary requires BOOLEAN but INT given", analyse.getFirstError().toString());
+		Assert.assertEquals(1, analyse.getFirstError().getNode().getLine());
+		Assert.assertEquals(1, analyse.getFirstError().getNode().getColumn());
 	}
 
 	@org.junit.Test
@@ -200,15 +218,33 @@ public class TypeCheckingTest {
 
 		analyse = analyzeProgram("1 ? 1 : 1;");
 		Assert.assertFalse(analyse.checking.isValid());
+		Assert.assertEquals("ternary requires BOOLEAN but INT given", analyse.getFirstError().toString());
+		Assert.assertEquals(1, analyse.getFirstError().getNode().getLine());
+		Assert.assertEquals(1, analyse.getFirstError().getNode().getColumn());
 
 		analyse = analyzeProgram("True ? True : 34;");
 		Assert.assertFalse(analyse.checking.isValid());
+		Assert.assertEquals("ternary return value requires BOOLEAN but INT given", analyse.getFirstError().toString());
+		Assert.assertEquals(1, analyse.getFirstError().getNode().getLine());
+		Assert.assertEquals(1, analyse.getFirstError().getNode().getColumn());
 	}
 
 	@org.junit.Test
 	public void testFor() throws Exception {
 		Analyse analyse = analyzeProgram("int i; for(i=0;i<5;i=i+1)begin ; end;");
 		Assert.assertTrue(analyse.checking.isValid());
+	}
+
+	@org.junit.Test
+	public void testIf() throws Exception {
+		Analyse analyse = analyzeProgram("int i;\n if (1 > 5 && 1 > 5 || 5 + 1 < 4) then \n write 1; end;");
+		Assert.assertTrue(analyse.checking.isValid());
+
+		analyse = analyzeProgram("int i;\n if (1) then \n write 1; end;");
+		Assert.assertFalse(analyse.checking.isValid());
+		Assert.assertEquals("if requires BOOLEAN but INT given", analyse.getFirstError().toString());
+		Assert.assertEquals(2, analyse.getFirstError().getNode().getLine());
+		Assert.assertEquals(6, analyse.getFirstError().getNode().getColumn());
 	}
 	
 	private Analyse analyzeProgram(String program) throws Exception {

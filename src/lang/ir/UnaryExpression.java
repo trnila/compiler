@@ -14,7 +14,8 @@ public class UnaryExpression extends Expression{
     private String operator;
     private Expression target;
 
-    public UnaryExpression(String operator, Expression target) {
+    public UnaryExpression(int line, int column, String operator, Expression target) {
+        super(line, column);
         this.operator = operator;
         this.target = target;
     }

@@ -15,4 +15,9 @@ public class Push implements IInstruction {
 	public void execute(Env env, Program program) {
 		env.getStack().push(value);
 	}
+
+	@Override
+	public String toString() {
+		return "push";
+	}
 }

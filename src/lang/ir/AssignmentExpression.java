@@ -14,7 +14,8 @@ public class AssignmentExpression extends Expression {
     private Variable variable;
     private Expression expression;
 
-    public AssignmentExpression(Variable variable, Expression expression) {
+    public AssignmentExpression(int line, int column, Variable variable, Expression expression) {
+        super(line, column);
         this.variable = variable;
         this.expression = expression;
     }

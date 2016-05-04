@@ -9,5 +9,7 @@ package lang.ir;
  * @author beh01
  */
 public abstract class Statement extends Node{
-
+	public Statement(int line, int column) {
+		super(line, column);
+	}
 }

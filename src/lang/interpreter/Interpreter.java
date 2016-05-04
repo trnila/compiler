@@ -2,24 +2,19 @@ package lang.interpreter;
 
 
 import lang.interpreter.Instructions.Loader.InstructionLoader;
-import org.apache.tools.ant.filters.StringInputStream;
+
+import java.io.*;
 
 public class Interpreter {
-	public void run() {
-		StringInputStream i = new StringInputStream("push 1\n" +
-				"push 4\n" +
-				"push 5\n" +
-				"mul\n" +
-				"add\n" +
-				"write 1");
+	public static void main(String[] args) throws IOException {
+		InputStream in;
+		if(args.length >= 1) {
+			in = new FileInputStream(args[0]);
+		} else {
+			in = System.in;
+		}
 
-		Program program = InstructionLoader.load(i);
-
+		Program program = InstructionLoader.load(in);
 		program.execute(new Env());
-	}
-
-	public static void main(String[] args) {
-		Interpreter i = new Interpreter();
-		i.run();
 	}
 }

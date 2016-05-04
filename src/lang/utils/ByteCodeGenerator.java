@@ -18,7 +18,7 @@ public class ByteCodeGenerator implements IRVisitor {
 
 	@Override
 	public void visit(AssignmentExpression st) {
-		System.out.println("save " + st.getVariable().getName());
+		out.println("save " + st.getVariable().getName());
 	}
 
 	@Override
@@ -34,9 +34,40 @@ public class ByteCodeGenerator implements IRVisitor {
 		opcodes.put("||", "or");
 		opcodes.put(">", "gt");
 		opcodes.put("<", "lt");
-		opcodes.put("=", "eq");
+		opcodes.put("==", "eq");
 
-		System.out.println(opcodes.get(exp.getOp()));
+		// TODO: maybe rewrite visitor?
+		opcodes.put(">=",
+				"save __y\n" +
+				"save __x\n" +
+				"load __x\n" +
+				"load __y\n" +
+				"gt\n" +
+				"load __x\n" +
+				"load __y\n" +
+				"eq\n" +
+				"or"
+		);
+
+		opcodes.put("<=",
+				"save __y\n" +
+				"save __x\n" +
+				"load __x\n" +
+				"load __y\n" +
+				"lt\n" +
+				"load __x\n" +
+				"load __y\n" +
+				"eq\n" +
+				"or"
+		);
+
+		opcodes.put("!=", "eq\nnot");
+
+		if(opcodes.get(exp.getOp()) != null) {
+			out.println(opcodes.get(exp.getOp()));
+		} else {
+			throw new UnsupportedOperationException("unknown binary operator: " + exp.getOp());
+		}
 	}
 
 	@Override
@@ -55,46 +86,60 @@ public class ByteCodeGenerator implements IRVisitor {
 		int endLabel = label++;
 
 		st.getCondition().accept(this);
-		System.out.println("fjmp " + elseLabel);
+		out.println("fjmp " + elseLabel);
 		st.getThenPart().accept(this);
-		System.out.println("jmp " + endLabel);
-		System.out.println("label " + elseLabel);
-		st.getElsePart().accept(this);
-		System.out.println("label " + endLabel);
+		out.println("jmp " + endLabel);
+		out.println("label " + elseLabel);
+		//TODO: some optimalizations if else part is not provided
+		if(st.getElsePart() != null) {
+			st.getElsePart().accept(this);
+		}
+		out.println("label " + endLabel);
 	}
 
 	@Override
 	public void visit(Constant exp) {
-		System.out.println("push " + exp);
+		out.print("push " + toChar(exp.getType()));
+
+		if(exp.getType() == Type.STRING) {
+			String value = exp.getValue().toString();
+			if(value.length() - 2 > 1) {
+				out.print(value.substring(1, value.length() - 1));
+			}
+			out.println();
+		} else {
+			out.println(exp.getValue());
+		}
+
 	}
 
 	@Override
 	public void visit(WriteStatement st) {
-		System.out.println("print " + st.getExpressions().size());
+		out.println("write " + st.getExpressions().size());
 	}
 
 	@Override
 	public void visit(ReadStatement st) {
 		for(Variable var: st.getVariables()) {
-			System.out.println("read " + var.getType());
-			System.out.println("save " + var.getName());
+			out.println("read " + var.getType());
+			out.println("save " + var.getName());
 		}
 	}
 
 	@Override
 	public void visit(UnaryExpression exp) {
 		if(exp.getOperator().equals("-")) {
-			System.out.println("uminus");
+			out.println("uminus");
 		} else if(exp.getOperator().equals("!")) {
-			System.out.println("not");
+			out.println("not");
 		} else {
-			System.out.println("errr");
+			out.println("errr");
 		}
 	}
 
 	@Override
 	public void visit(Variable exp) {
-		System.out.println("load " + exp.getName());
+		out.println("load " + exp.getName());
 	}
 
 	@Override
@@ -102,21 +147,39 @@ public class ByteCodeGenerator implements IRVisitor {
 		int loopLabel = label++;
 		int endLabel = label++;
 
-		//System.out.println("labelik");
+		//out.println("labelik");
 		st.getInitialization().accept(this);
 
-		System.out.println("label " + loopLabel);
+		out.println("label " + loopLabel);
 		st.getCondition().accept(this);
-		System.out.println("jmpf " + endLabel);
+		out.println("fjmp " + endLabel);
 
 		st.getBody().accept(this);
 		st.getAfterthought().accept(this);
-		System.out.println("jmp " + loopLabel);
-		System.out.println("label " + endLabel);
+		out.println("jmp " + loopLabel);
+		out.println("label " + endLabel);
 	}
 
 	@Override
 	public void visit(VariableDeclaration decl) {
 
+	}
+
+	private char toChar(Type type) {
+		//TODO: move!
+		switch(type) {
+			case INT:
+				return 'I';
+			case FLOAT:
+				return 'F';
+			case STRING:
+				return 'S';
+			case BOOLEAN:
+				return 'B';
+			case ERROR:
+				return 'E';// TODO: ?
+		}
+
+		return 'E';
 	}
 }

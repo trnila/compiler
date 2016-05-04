@@ -14,7 +14,8 @@ import lang.utils.IRVisitor;
 public class BlockOfStatements  extends Statement{
     ArrayList<Statement> statements = new ArrayList<Statement>();
 
-    public BlockOfStatements() {
+    public BlockOfStatements(int line, int column) {
+        super(line, column);
     }
 
     public ArrayList<Statement> getStatements() {

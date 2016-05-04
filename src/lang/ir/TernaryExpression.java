@@ -13,7 +13,8 @@ import lang.utils.IRVisitor;
 public class TernaryExpression extends Expression{
     private Expression condition, leftPart, rightPart;
 
-    public TernaryExpression(Expression condition, Expression leftPart, Expression rightPart) {
+    public TernaryExpression(int line, int column, Expression condition, Expression leftPart, Expression rightPart) {
+        super(line, column);
         this.condition = condition;
         this.leftPart = leftPart;
         this.rightPart = rightPart;

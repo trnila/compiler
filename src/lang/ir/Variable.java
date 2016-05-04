@@ -13,7 +13,8 @@ import lang.utils.IRVisitor;
 public class Variable extends Expression{
     private String name;
 
-    public Variable(String name) {
+    public Variable(int line, int column, String name) {
+        super(line, column);
         this.name = name;
     }
 

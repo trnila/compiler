@@ -25,11 +25,27 @@ public class Program {
 				instructions.get(pc).execute(env, this);
 				env.nextInstruction();
 			} catch(Exception e) {
-				System.out.println(pc + ":" + instructions.get(pc));
-				e.printStackTrace();
-				throw e;
+				printDebuggingInformation(env, pc, e);
+				return;
 			}
 		}
+	}
+
+	private void printDebuggingInformation(Env env, int pc, Exception e) {
+		System.err.println("An internal error occured in language interpretter\n");
+
+		for(int i = Math.max(0, pc - 5); i <= pc; i++) {
+			System.err.println(instructions.get(i));
+		}
+
+		System.err.println("\nStack:");
+		while(!env.getStack().empty()) {
+			Value val = env.getStack().pop();
+			System.err.println(val);
+		}
+
+		System.err.println("\nThrown exception: ");
+		e.printStackTrace(System.err);
 	}
 
 	public int getPcFor(int destination) {

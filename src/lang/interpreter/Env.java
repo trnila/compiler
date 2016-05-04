@@ -1,8 +1,5 @@
 package lang.interpreter;
 
-import org.apache.tools.ant.filters.StringInputStream;
-
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -14,7 +11,7 @@ public class Env {
 	private int pc = 0;
 	private Stack<Value> stack = new Stack<>();
 	private PrintStream out = System.out;
-	private Scanner in;
+	private Scanner in = new Scanner(System.in);
 	private HashMap<String, Value> variables = new HashMap<>();
 
 	public Stack<Value> getStack() {

@@ -17,35 +17,38 @@ public class MathInstruction implements IInstruction {
 		Value first = env.getStack().pop();
 		Value second = env.getStack().pop();
 
-		if(first.getType() == Type.INT) {
-			int a = first.getInt();
-			int b = second.getInt();
-			int c;
+		float a = second.getFloat();
+		float b = first.getFloat();
+		float c;
 
-			switch(operator) {
-				case "add":
-					c = a + b;
-					break;
-				case "sub":
-					c = a - b;
-					break;
-				case "mul":
-					c = a * b;
-					break;
-				case "div":
-					c = a / b;
-					break;
-				case "mod":
-					c = a % b;
-					break;
-				default:
-					throw new RuntimeException("unknown");
-			}
-
-			env.getStack().push(new Value(Type.INT, c));
-		} else {
-			throw new RuntimeException("unknown");
+		switch(operator) {
+			case "add":
+				c = a + b;
+				break;
+			case "sub":
+				c = a - b;
+				break;
+			case "mul":
+				c = a * b;
+				break;
+			case "div":
+				c = a / b;
+				break;
+			case "mod":
+				c = a % b;
+				break;
+			default:
+				throw new RuntimeException("unknown-" + operator);
 		}
+
+		boolean flo = first.getType() == Type.FLOAT || second.getType() == Type.FLOAT;
+
+		if(flo) {
+			env.getStack().push(new Value(Type.FLOAT, c));
+		} else {
+			env.getStack().push(new Value(Type.INT, (int) c));
+		}
+
 	}
 
 	@Override

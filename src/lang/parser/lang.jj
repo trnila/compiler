@@ -66,8 +66,8 @@ TOKEN :
 	| <STRING: "String">
 
 	// literals
-	| <TRUE: "True">
-	| <FALSE: "False">
+	| <TRUE: "True" | "true">
+	| <FALSE: "False" | "false">
 
 	// "functions"
 	| <READ: "read">
@@ -144,7 +144,7 @@ BlockOfStatements Program() :
 
 BlockOfStatements Statements():
 {
-	BlockOfStatements statements = new BlockOfStatements();
+	BlockOfStatements statements = null;
 	Statement s;
 }
 {
@@ -152,6 +152,10 @@ BlockOfStatements Statements():
 		s = Statement()
 		{
 			if(s != null) {
+				if(statements == null) {
+					statements = new BlockOfStatements(s.getLine(), s.getColumn());
+				}
+
 				statements.getStatements().add(s);
 			}
 		}
@@ -169,20 +173,7 @@ Variable VariableDeclaratorId() :
 }
 {
 	tok = <IDENTIFIER>
-	{return new Variable(tok.toString());}
-}
-
-/*
- * Type, name and expression syntax follows.
- */
-
-Type Type() :
-{}
-{
-	  <BOOLEAN> {return Type.BOOLEAN;}
-	| <INT> {return Type.INT;}
-	| <FLOAT> {return Type.FLOAT;}
-	| <STRING> {return Type.STRING;}
+	{return new Variable(tok.beginLine, tok.beginColumn, tok.toString());}
 }
 
 /*
@@ -207,7 +198,7 @@ AssignmentExpression Assignment() :
 }
 {
 	var = VariableDeclaratorId() "=" expr = Expression()
-	{return new AssignmentExpression(var, expr);}
+	{return new AssignmentExpression(var.getLine(), var.getColumn(), var, expr);}
 }
 
 Expression ConditionalExpression() :
@@ -219,7 +210,7 @@ Expression ConditionalExpression() :
 	expr = ConditionalOrExpression()
 	[
 	    "?" ifExpr = ConditionalExpression() ":" elseExpr = ConditionalExpression()
-	    {expr = new TernaryExpression(expr, ifExpr, elseExpr);}
+	    {expr = new TernaryExpression(expr.getLine(), expr.getColumn(), expr, ifExpr, elseExpr);}
 	]
 	{return expr;}
 }
@@ -233,7 +224,7 @@ Expression ConditionalOrExpression() :
 	(
 	    "||"
 	    expr2 = ConditionalAndExpression()
-	    {expr = new BinaryExpression(expr, "||", expr2);}
+	    {expr = new BinaryExpression(expr2.getLine(), expr2.getColumn(), expr, "||", expr2);}
 	)*
 	{return expr;}
 }
@@ -247,7 +238,7 @@ Expression ConditionalAndExpression() :
 	(
 	    "&&"
 	    expr2 = EqualityExpression()
-	    {expr = new BinaryExpression(expr, "&&", expr2);}
+	    {expr = new BinaryExpression(expr2.getLine(), expr2.getColumn(), expr, "&&", expr2);}
 	 )*
 	{return expr;}
 }
@@ -262,7 +253,7 @@ Expression EqualityExpression() :
 	(
 	    (tok = "==" | tok = "!=" )
 	    expr2 = RelationalExpression()
-	    {expr = new BinaryExpression(expr, tok.toString(), expr2);}
+	    {expr = new BinaryExpression(expr2.getLine(), expr2.getColumn(), expr, tok.toString(), expr2);}
 	)*
 
 	{return expr;}
@@ -278,7 +269,7 @@ Expression RelationalExpression() :
 	(
 	    (tok = "<" | tok = ">" | tok = "<=" | tok = ">=" )
 	    expr2 =AdditiveExpression()
-	    {expr = new BinaryExpression(expr, tok.toString(), expr2);}
+	    {expr = new BinaryExpression(expr2.getLine(), expr2.getColumn(), expr, tok.toString(), expr2);}
 	)*
 	{return expr;}
 }
@@ -294,7 +285,7 @@ Expression AdditiveExpression() :
 		(tok = "+" | tok = "-" | tok = ".")
 		expr2 = MultiplicativeExpression()
 
-		{expr = new BinaryExpression(expr, tok.toString(), expr2);}
+		{expr = new BinaryExpression(expr2.getLine(), expr2.getColumn(), expr, tok.toString(), expr2);}
 	)*
 	{return expr;}
 }
@@ -310,7 +301,7 @@ Expression MultiplicativeExpression() :
 		(tok = "*" | tok = "/" | tok = "%" )
 		expr2 = UnaryExpression()
 
-		{expr = new BinaryExpression(expr, tok.toString(), expr2);}
+		{expr = new BinaryExpression(expr2.getLine(), expr2.getColumn(), expr, tok.toString(), expr2);}
 	)*
 	{return expr;}
 }
@@ -324,7 +315,7 @@ Expression UnaryExpression() :
 	  (
 			(tok = "-" | tok = "!")
 			expr = UnaryExpression()
-			{expr = new UnaryExpression(tok.toString(), expr);}
+			{expr = new UnaryExpression(tok.beginLine, tok.beginColumn, tok.toString(), expr);}
 		|
 			expr = PrimaryPrefix()
 	  )
@@ -354,16 +345,16 @@ Constant Literal() :
 {
 	(
 	    token = <INTEGER_LITERAL>
-        {c = new Constant(token.toString(), Type.INT);}
+        {c = new Constant(token.beginLine, token.beginColumn, token.toString(), Type.INT);}
 	|
 	    token = <FLOATING_POINT_LITERAL>
-	    {c = new Constant(token.toString(), Type.FLOAT);}
+	    {c = new Constant(token.beginLine, token.beginColumn, token.toString(), Type.FLOAT);}
 	|
 	    token = <STRING_LITERAL>
-	    {c = new Constant(token.toString(), Type.STRING);}
+	    {c = new Constant(token.beginLine, token.beginColumn, token.toString(), Type.STRING);}
 	|
 	    (token = <TRUE> | token = <FALSE>)
-        {c = new Constant(token.toString().equalsIgnoreCase("true"), Type.BOOLEAN);}
+        {c = new Constant(token.beginLine, token.beginColumn, token.toString().equalsIgnoreCase("true"), Type.BOOLEAN);}
 	)
 
 	{return c;}
@@ -385,7 +376,7 @@ Statement Statement() :
         | s = ForStatement()
         | s = WriteStatement()
         | s = ReadStatement()
-        | expr = Expression() ";" {return new ExpressionStatement(expr);}
+        | expr = Expression() ";" {return new ExpressionStatement(expr.getLine(), expr.getColumn(), expr);}
     )
 	{return s;}
 }
@@ -395,13 +386,20 @@ VariableDeclaration LocalVariableDeclaration() :
     VariableDeclaration decl;
     Variable var;
     Type type;
+    Token tok;
 }
 {
-	type = Type()
+	(
+	      tok = <BOOLEAN> {type = Type.BOOLEAN;}
+    	| tok = <INT> {type = Type.INT;}
+    	| tok = <FLOAT> {type = Type.FLOAT;}
+    	| tok = <STRING> {type = Type.STRING;}
+	)
+
 	var = VariableDeclaratorId()
 	{
 		var.setType(type);
-		decl = new VariableDeclaration(type, var);
+		decl = new VariableDeclaration(tok.beginLine, tok.beginColumn, type, var);
 	}
 	(
 	 ","
@@ -418,23 +416,25 @@ IfStatement IfStatement() :
 {
     Expression condition;
     BlockOfStatements ifStatements, elseStatements = null;
+    Token tok;
 }
 {
-	"if" condition = Expression() <THEN> ifStatements = Statements() [ <ELSE> elseStatements = Statements() ] <END> ";"
-	{return new IfStatement(condition, ifStatements, elseStatements);}
+	tok = "if" condition = Expression() <THEN> ifStatements = Statements() [ <ELSE> elseStatements = Statements() ] <END> ";"
+	{return new IfStatement(tok.beginLine, tok.beginColumn, condition, ifStatements, elseStatements);}
 }
 
 ForStatement ForStatement() :
 {
     Expression initialization = null, condition = null, afterthought = null;
     BlockOfStatements body;
+    Token tok;
 }
 {
-	"for" "(" [ initialization = Expression() ] ";" [ condition = Expression() ] ";" [ afterthought = Expression() ] ")"
+	tok = "for" "(" [ initialization = Expression() ] ";" [ condition = Expression() ] ";" [ afterthought = Expression() ] ")"
 	<BEGIN>
 	body = Statements()
 	<END>";"
-	{return new ForStatement(initialization, condition, afterthought, body);}
+	{return new ForStatement(tok.beginLine, tok.beginColumn, initialization, condition, afterthought, body);}
 }
 
 List<Expression> ExpressionList() :
@@ -458,15 +458,17 @@ List<Expression> ExpressionList() :
 // IO Commands
 WriteStatement WriteStatement() :
 {
-	WriteStatement s = new WriteStatement();
+	WriteStatement s;
 	List<Expression> expressions;
+	Token tok;
 }
 {
-	"write"
+	tok = "write"
 	expressions = ExpressionList()
 	 ";"
 
 	{
+		s = new WriteStatement(tok.beginLine, tok.beginColumn);
 		s.getExpressions().addAll(expressions);
 		return s;
 	}
@@ -491,15 +493,17 @@ List<Variable> VariableList():
 
 ReadStatement ReadStatement() :
 {
-    ReadStatement s = new ReadStatement();
+    ReadStatement s;
     List<Variable> vars;
+    Token tok;
 }
 {
-	"read"
+	tok = "read"
 	vars = VariableList()
 	";"
 
 	{
+		s = new ReadStatement(tok.beginLine, tok.beginColumn);
 	    s.getVariables().addAll(vars);
 	    return s;
 	}

@@ -15,6 +15,13 @@ public class Value {
 		this(type, Integer.toString(value));
 	}
 
+	public Value(Type type, float value) {
+		this(type, Float.toString(value));
+	}
+	public Value(Type type, boolean value) {
+		this(type, Boolean.toString(value));
+	}
+
 	public int getInt() {
 		return Integer.parseInt(value);
 	}
@@ -30,5 +37,13 @@ public class Value {
 
 	public boolean getBool() {
 		return Boolean.parseBoolean(value) || value.equals("1");
+	}
+
+	public float getFloat() {
+		return Float.parseFloat(value);
+	}
+
+	public String getString() {
+		return value;
 	}
 }

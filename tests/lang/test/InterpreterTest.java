@@ -72,7 +72,7 @@ public class InterpreterTest {
 				"write 1"
 		);
 
-		Assert.assertEquals("8\n", out.toString());
+		Assert.assertEquals("7\n", out.toString());
 	}
 
 	@Test
@@ -128,7 +128,7 @@ public class InterpreterTest {
 				"write 5"
 		);
 
-		Assert.assertEquals("15=10+5\n", out.toString());
+		Assert.assertEquals("5+10=15\n", out.toString());
 	}
 
 	@Test
@@ -142,7 +142,7 @@ public class InterpreterTest {
 			"write 4"
 		);
 
-		Assert.assertEquals("4.56truedaniel18\n", out.toString());
+		Assert.assertEquals("18danieltrue4.56\n", out.toString());
 	}
 
 

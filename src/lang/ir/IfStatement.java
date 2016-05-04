@@ -15,7 +15,8 @@ public class IfStatement extends Statement {
     private Expression condition;
     private BlockOfStatements thenPart, elsePart;
 
-    public IfStatement(Expression condition, BlockOfStatements thenPart, BlockOfStatements elsePart) {
+    public IfStatement(int line, int column, Expression condition, BlockOfStatements thenPart, BlockOfStatements elsePart) {
+        super(line, column);
         this.condition = condition;
         this.thenPart = thenPart;
         this.elsePart = elsePart;

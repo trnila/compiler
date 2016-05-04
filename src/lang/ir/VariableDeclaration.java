@@ -9,7 +9,8 @@ public class VariableDeclaration extends Statement {
 	private Type type;
 	private List<Variable> variables = new ArrayList<>();
 
-	public VariableDeclaration(Type type, Variable var) {
+	public VariableDeclaration(int line, int column, Type type, Variable var) {
+		super(line, column);
 		this.type = type;
 		variables.add(var);
 	}

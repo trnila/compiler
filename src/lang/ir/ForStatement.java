@@ -16,7 +16,8 @@ public class ForStatement extends Statement{
 	private Expression afterthought;
     private BlockOfStatements body;
 
-	public ForStatement(Expression initialization, Expression condition, Expression afterthought, BlockOfStatements body) {
+	public ForStatement(int line, int column, Expression initialization, Expression condition, Expression afterthought, BlockOfStatements body) {
+		super(line, column);
 		this.initialization = initialization;
 		this.condition = condition;
 		this.afterthought = afterthought;

@@ -3,22 +3,19 @@ package lang.interpreter.Instructions;
 import lang.interpreter.Env;
 import lang.interpreter.Program;
 import lang.interpreter.Value;
+import lang.ir.Type;
 
-public class Save implements IInstruction {
-	private String variable;
-
-	public Save(String variable) {
-		this.variable = variable;
-	}
-
+public class Concat implements IInstruction {
 	@Override
 	public void execute(Env env, Program program) {
-		Value val = env.getStack().pop();
-		env.save(variable, val);
+		String b = env.getStack().pop().toString();
+		String a = env.getStack().pop().toString();
+
+		env.getStack().push(new Value(Type.STRING, a + b));
 	}
 
 	@Override
 	public String toString() {
-		return "save " + variable;
+		return "concat";
 	}
 }

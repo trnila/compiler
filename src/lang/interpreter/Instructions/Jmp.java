@@ -14,4 +14,9 @@ public class Jmp implements IInstruction {
 	public void execute(Env env, Program program) {
 		env.jump(program.getPcFor(destination) - 1);
 	}
+
+	@Override
+	public String toString() {
+		return "jmp " + destination;
+	}
 }

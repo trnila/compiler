@@ -14,7 +14,8 @@ import lang.utils.IRVisitor;
 public class ReadStatement extends Statement {
     private ArrayList<Variable> variables = new ArrayList<Variable>();
 
-    public ReadStatement() {
+    public ReadStatement(int line, int column) {
+        super(line, column);
     }
 
     public ArrayList<Variable> getVariables() {

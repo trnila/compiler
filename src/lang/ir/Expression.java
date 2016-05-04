@@ -11,6 +11,10 @@ package lang.ir;
 public abstract class Expression extends Node{
     private Type type;
 
+    public Expression(int line, int column) {
+        super(line, column);
+    }
+
     public Type getType() {
         return type;
     }

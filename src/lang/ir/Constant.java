@@ -13,7 +13,8 @@ import lang.utils.IRVisitor;
 public class Constant extends Expression{
     private Object value;
 
-    public Constant(Object value, Type type) {
+    public Constant(int line, int column, Object value, Type type) {
+        super(line, column);
         this.value = value;
         setType(type);
     }
