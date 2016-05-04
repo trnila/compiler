@@ -2,28 +2,23 @@ package lang;
 
 import lang.ir.BlockOfStatements;
 import lang.parser.LangParser;
-import lang.utils.ByteCodeGenerator;
-import lang.utils.IRVisitor;
-import lang.utils.NicePrintingVisitor;
-import lang.utils.TypeChecking;
+import lang.parser.ParseException;
+import lang.utils.*;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-	public static void main(String[] args) throws Exception {
-		IRVisitor visitor = new NicePrintingVisitor();
+	private final List<String> lines = new ArrayList<>();
+	private final InputStream is;
 
-		InputStream is;
-		if(args.length < 1) {
-			is = System.in;
-		} else {
-			is = new FileInputStream(args[0]);
-		}
+	public Main(InputStream in) throws IOException {
+		is = load(in);
+	}
 
-		List<String> lines = new ArrayList<>();
-		BufferedReader r = new BufferedReader(new InputStreamReader(is));
+	private InputStream load(InputStream in) throws IOException {
+		InputStream is;BufferedReader r = new BufferedReader(new InputStreamReader(in));
 		String line;
 		StringBuilder b = new StringBuilder();
 		while((line = r.readLine()) != null) {
@@ -33,40 +28,74 @@ public class Main {
 		}
 
 		is = new ByteArrayInputStream(b.toString().getBytes());
+		return is;
+	}
 
+	public boolean compile() throws IOException {
 		LangParser p = new LangParser(is);
-		BlockOfStatements program = p.Program();
-		//program.accept(visitor);
+		BlockOfStatements program;
+
+		try {
+			program = p.Program();
+		} catch(ParseException e) {
+			printError(e.getMessage(), e.currentToken.beginLine, e.currentToken.beginColumn);
+			return false;
+		}
+
+
 		TypeChecking checking = new TypeChecking();
 		program.accept(checking);
 
 		for(lang.utils.Error error: checking.getErrors()) {
-			int lin = error.getNode().getLine();
-
-			for(int i = Math.max(lin - 3, 0); i <= lin - 1; i++) {
-				System.out.println(
-						String.format("%3d", i + 1) +
-						"  " +
-						lines.get(i)
-				);
-			}
-
-			for (int i = -5; i < error.getNode().getColumn() - 1; i++) {
-				System.out.print(' ');
-			}
-			System.out.println("^---- " + error + "\n");
+			printError(error.toString(), error.getNode().getLine(), error.getNode().getColumn());
 		}
 
+		if(!checking.isValid()) {
+			return false;
+		}
 
 		File f = new File("a.out");
 		f.createNewFile();
 		f.setExecutable(true);
 
 		FileOutputStream stream = new FileOutputStream(f.getPath());
+		generateCode(program, stream);
+		return true;
+	}
+
+	private void printError(String error, int line, int column) {
+		for(int i = Math.max(line - 5, 0); i <= line - 1; i++) {
+			System.out.println(
+					String.format("%3d", i + 1) +
+							"  " +
+							lines.get(i)
+			);
+		}
+
+
+		for (int i = -5; i < column - 1; i++) {
+			System.out.print(' ');
+		}
+		System.out.println("^---- " + error + "\n");
+	}
+
+	private void generateCode(BlockOfStatements program, FileOutputStream stream) throws IOException {
 		stream.write("#!./run\n".getBytes());
 		ByteCodeGenerator gen = new ByteCodeGenerator(stream);
 		program.accept(gen);
-		//System.out.println(stream);
 		stream.close();
+	}
+
+	public static void main(String[] args) throws Exception {
+		InputStream is;
+		if(args.length < 1) {
+			is = System.in;
+		} else {
+			is = new FileInputStream(args[0]);
+		}
+
+		if(!new Main(is).compile()) {
+			System.exit(1);
+		}
 	}
 }
