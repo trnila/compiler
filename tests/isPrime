@@ -2,26 +2,32 @@ int n;
 write "Please, enter number to test if its prime or not: ";
 read n;
 
-// compute sqrt of n
-float max;
-max = n / 3;
-if n <= 0 then
-	max = 0;
+boolean isPrime;
+if n <= 1 || (n % 2 == 0 && n != 2) then
+	isPrime = False;
 else
+	// compute sqrt of n
+	float max;
+	max = n / 3;
 	int i;
 	for (i=0; i<32; i = i+1) begin
 		max = (max + n / max) / 2;
 	end;
-end;
+	write max;
 
-// compute if is prime
-boolean isPrime;
-isPrime = True;
-int x;
-for(x = 1; x <= max; x = x + 1) begin
-	if n % x != 0 then
+	// compute if is prime
+	if max > 0 then
+		isPrime = True;
+		int x;
+		for(x = 3; x <= max; x = x + 2) begin
+			if n % x == 0 then
+				isPrime = False;
+				write x;
+			end;
+		end;
+	else
 		isPrime = False;
 	end;
 end;
 
-write n, " is ", isPrime ? " " : "not", "prime";
+write n, " is ", isPrime ? "" : "not ", " ", "prime";
