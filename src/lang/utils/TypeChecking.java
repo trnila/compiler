@@ -147,7 +147,12 @@ public class TypeChecking implements IRVisitor {
 
 	@Override
     public void visit(IfStatement st) {
+		//TODO: this is bad!
 		st.getCondition().accept(this);
+		st.getThenPart().accept(this);
+		if(st.getElsePart() != null) {
+			st.getElsePart().accept(this);
+		}
 
 		if(st.getCondition().getType() != Type.BOOLEAN) {
 			error(new BadTypeError(
@@ -222,6 +227,10 @@ public class TypeChecking implements IRVisitor {
 		if(st.getCondition().getType() != Type.BOOLEAN) {
 			error("expected boolean in for");
 		}
+
+	    if(st.getBody() != null) {
+		    st.getBody().accept(this);
+	    }
     }
 
     @Override
@@ -259,7 +268,6 @@ public class TypeChecking implements IRVisitor {
 		System.out.println(message);
 		valid = false;
 	}
-	private void error(String message, Node node) {}
 
 	private void error(Error error) {
 		errors.add(error);
